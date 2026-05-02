@@ -5,13 +5,28 @@ using AttendanceAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add environment variables to configuration
+builder.Configuration.AddEnvironmentVariables();
+
 // MongoDB
-builder.Services.Configure<MongoDbSettings>(
-    builder.Configuration.GetSection("MongoDbSettings"));
+var mongoUrl = Environment.GetEnvironmentVariable("MONGODB_URL") ?? 
+               builder.Configuration["MongoDbSettings:ConnectionString"] ?? 
+               "mongodb://localhost:27017";
+
+var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET") ?? 
+                builder.Configuration["Jwt:Key"] ?? 
+                "UniversityAttendanceSecretKey2024!!";
+
+// Configure MongoDbSettings
+builder.Services.Configure<MongoDbSettings>(options =>
+{
+    options.ConnectionString = mongoUrl;
+    options.DatabaseName = builder.Configuration["MongoDbSettings:DatabaseName"] ?? "UniversityAttendanceDB";
+});
+
 builder.Services.AddSingleton<MongoDbService>();
 
 // JWT Auth
-var jwtKey = builder.Configuration["Jwt:Key"]!;
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options => {
         options.TokenValidationParameters = new TokenValidationParameters {
@@ -21,7 +36,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret))
         };
     });
 

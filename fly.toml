@@ -6,7 +6,7 @@ primary_region = "iad"
 
 [[services]]
   protocol = "tcp"
-  internal_port = 5069
+  internal_port = 3000
   processes = ["app"]
 
   [[services.ports]]
@@ -18,21 +18,9 @@ primary_region = "iad"
     port = 443
     handlers = ["tls", "http"]
 
-[[services]]
-  protocol = "tcp"
-  internal_port = 3000
-  processes = ["frontend"]
-
-  [[services.ports]]
-    port = 3000
-    handlers = ["http"]
-
 [env]
   ASPNETCORE_ENVIRONMENT = "Production"
-  MongoDb__DatabaseName = "attendance_db"
-  Jwt__Issuer = "AttendanceAPI"
-  Jwt__Audience = "AttendanceApp"
-  Jwt__ExpiresInHours = "24"
+  PORT = "3000"
 
 [mounts]
   source = "data"
