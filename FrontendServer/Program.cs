@@ -46,14 +46,12 @@ if (!string.IsNullOrEmpty(frontendPath) && Directory.Exists(frontendPath))
 else
 {
     // Fallback if frontend folder not found - return error with diagnostic info
-    var debugInfo = $@"
-Frontend folder not found. 
+    var debugInfo = $@"Frontend folder not found. 
 Current directory: {Directory.GetCurrentDirectory()}
 Base directory: {AppContext.BaseDirectory}
-Searched paths: {string.Join(", ", possiblePaths)}
-";
-    app.MapGet("/", () => Results.StatusCode(500).WithContentType("text/plain") ?? debugInfo);
-    app.MapFallback(() => Results.StatusCode(500).WithContentType("text/plain") ?? debugInfo);
+Searched paths: {string.Join(", ", possiblePaths)}";
+    app.MapGet("/", () => Results.Text(debugInfo, statusCode: 500));
+    app.MapFallback(() => Results.Text(debugInfo, statusCode: 500));
 }
 
 app.Run();
