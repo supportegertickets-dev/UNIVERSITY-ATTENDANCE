@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>University Attendance System</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#222;font-size:14px}
+
+#loginPage{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#003b1f 0%,#006633 60%,#f9b000 100%)}
+.login-wrap{background:white;border-radius:18px;width:400px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.35)}
+.login-header{background:#003b1f;padding:30px;text-align:center;color:white}
+.login-header .icon{font-size:52px;margin-bottom:8px}
+.login-header h2{font-size:17px;font-weight:800}
+.login-header p{font-size:11px;opacity:.7;margin-top:3px}
+.login-body{padding:30px}
+.login-body label{font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px}
+.login-body input{width:100%;padding:11px 14px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px;margin-bottom:16px;transition:border .2s}
+.login-body input:focus{outline:none;border-color:#006633}
+.login-btn{width:100%;padding:13px;background:#006633;color:white;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer}
+.login-btn:hover{background:#004d26}.login-btn:disabled{background:#aaa;cursor:not-allowed}
+.login-err{color:#e53935;font-size:12px;text-align:center;margin-top:10px;display:none}
+.demo-hint{margin-top:14px;font-size:11px;color:#bbb;text-align:center;line-height:1.8}
+
+#app{display:none;min-height:100vh;flex-direction:column}
+.topbar{background:#003b1f;color:white;display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:58px}
+.topbar-brand .name{font-size:15px;font-weight:800}.topbar-brand .sub{font-size:10px;opacity:.6;margin-top:1px}
+.topbar-right{display:flex;align-items:center;gap:10px;font-size:13px}
+.topbar-right .user{background:rgba(255,255,255,.12);padding:6px 14px;border-radius:20px;font-weight:600}
+.topbar-right .role{font-size:10px;color:#f9b000;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.logout-btn{background:transparent;border:1.5px solid rgba(255,255,255,.35);color:white;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600}
+.logout-btn:hover{background:rgba(255,255,255,.15)}
+.goldbar{background:#f9b000;padding:5px 24px;font-size:11px;font-weight:700;color:#003b1f;display:flex;justify-content:space-between}
+.navtabs{background:#00521e;display:flex;padding:0 24px;gap:2px;flex-wrap:wrap}
+.tab{padding:11px 18px;color:rgba(255,255,255,.6);font-size:13px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s}
+.tab:hover{color:white}.tab.active{color:white;border-bottom-color:#f9b000}
+
+.page{display:none;padding:24px;max-width:1300px;margin:0 auto;width:100%}
+.page.active{display:block}
+
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}
+@media(max-width:800px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat{background:white;border-radius:12px;padding:16px 18px;box-shadow:0 2px 8px rgba(0,0,0,.06);border-top:4px solid #ccc;position:relative;overflow:hidden}
+.stat.s1{border-color:#006633}.stat.s2{border-color:#1565c0}.stat.s3{border-color:#c62828}.stat.s4{border-color:#f9b000}.stat.s5{border-color:#6a1b9a}
+.stat .num{font-size:28px;font-weight:800}
+.stat.s1 .num{color:#006633}.stat.s2 .num{color:#1565c0}.stat.s3 .num{color:#c62828}.stat.s4 .num{color:#e6a800}.stat.s5 .num{color:#6a1b9a}
+.stat .lbl{font-size:11px;color:#999;margin-top:2px;text-transform:uppercase;letter-spacing:.4px}
+.stat .icon2{position:absolute;right:14px;top:14px;font-size:20px;opacity:.18}
+
+.card{background:white;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:20px;margin-bottom:18px}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #f0f0f0}
+.card-head h3{font-size:14px;font-weight:800;color:#003b1f}
+.card-head .actions{display:flex;gap:8px}
+
+.btn{padding:8px 16px;border-radius:7px;border:none;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-primary{background:#006633;color:white}.btn-primary:hover{background:#004d26}
+.btn-gold{background:#f9b000;color:#003b1f}.btn-gold:hover{background:#e6a800}
+.btn-danger{background:#e53935;color:white}.btn-danger:hover{background:#b71c1c}
+.btn-warn{background:#ff6f00;color:white}.btn-warn:hover{background:#e65100}
+.btn-purple{background:#6a1b9a;color:white}.btn-purple:hover{background:#4a148c}
+.btn-outline{background:transparent;color:#006633;border:1.5px solid #006633}.btn-outline:hover{background:#e8f5e9}
+.btn-sm{padding:5px 11px;font-size:11px}
+.btn-icon{background:none;border:none;cursor:pointer;font-size:15px;padding:3px 6px;border-radius:4px}
+.btn-icon:hover{background:#f0f0f0}
+
+/* ── SESSION CARDS ── */
+.session-open-form{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.session-open-form select,.session-open-form input{padding:9px 11px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:12px;width:100%}
+.session-open-form select:focus,.session-open-form input:focus{outline:none;border-color:#006633}
+.duration-row{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.duration-row label{font-size:12px;font-weight:700;color:#555;white-space:nowrap}
+.duration-row input{padding:8px 10px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:13px;width:80px}
+
+.active-sessions{display:flex;flex-direction:column;gap:10px}
+.session-card{border-radius:10px;padding:14px 16px;border:2px solid #a5d6a7;background:#f1f8f4;position:relative;overflow:hidden}
+.session-card.expired{border-color:#e0e0e0;background:#fafafa;opacity:.7}
+.session-card .sc-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px}
+.session-card .sc-title{font-size:14px;font-weight:800;color:#003b1f}
+.session-card .sc-sub{font-size:11px;color:#777;margin-top:2px}
+.session-card .sc-actions{display:flex;gap:6px;flex-shrink:0}
+.session-card .timer-bar{height:6px;background:#e0e0e0;border-radius:10px;overflow:hidden;margin-top:10px}
+.session-card .timer-fill{height:100%;background:#006633;border-radius:10px;transition:width 1s linear}
+.session-card .timer-fill.warn{background:#ff6f00}
+.session-card .timer-fill.danger{background:#c62828}
+.timer-label{font-size:11px;color:#555;margin-top:4px;text-align:right}
+.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
+.status-dot.open{background:#2e7d32;animation:blink 1.2s ease infinite}
+.status-dot.closed,.status-dot.expired{background:#aaa}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── SCANNER ── */
+.scan-grid{display:grid;grid-template-columns:400px 1fr;gap:18px}
+@media(max-width:800px){.scan-grid{grid-template-columns:1fr}}
+.scan-zone{border:2px dashed #a5d6a7;border-radius:12px;padding:22px;text-align:center;background:#f1f8f4;transition:all .3s;margin-bottom:12px}
+.scan-zone.scanning{border-color:#006633;background:#c8e6c9;animation:pulse .4s ease 2}
+.scan-zone.success{border-color:#2e7d32;background:#e8f5e9}
+.scan-zone.error{border-color:#c62828;background:#ffebee}
+.scan-zone.locked{border-color:#ff6f00;background:#fff3e0}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.015)}}
+.scan-icon{font-size:36px;margin-bottom:6px}
+.scan-msg{font-size:12px;color:#555;line-height:1.6}
+.scan-input-row{display:flex;gap:8px}
+.scan-input-row input{flex:1;padding:11px 14px;border:2px solid #e0e0e0;border-radius:8px;font-size:13px;font-family:monospace}
+.scan-input-row input:focus{outline:none;border-color:#006633}
+.scan-input-row button{padding:11px 16px;background:#006633;color:white;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer}
+
+/* session selector for scanner */
+.session-selector{background:#e8f5e9;border-radius:8px;padding:12px;margin-bottom:12px}
+.session-selector label{font-size:11px;font-weight:700;color:#2e7d32;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px}
+.session-selector select{width:100%;padding:8px 10px;border:1.5px solid #a5d6a7;border-radius:6px;font-size:12px;background:white}
+.no-session-warn{background:#fff3e0;border:1.5px solid #ffb74d;border-radius:8px;padding:12px;font-size:12px;color:#e65100;margin-bottom:12px;text-align:center;font-weight:600}
+
+.reg-list{max-height:380px;overflow-y:auto}
+.reg-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;margin-bottom:4px;background:#fafafa;border:1px solid #f0f0f0}
+.reg-item:hover{background:#f1f8f4}
+.reg-avatar{width:32px;height:32px;border-radius:50%;background:#006633;color:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0}
+.reg-info{flex:1;min-width:0}
+.reg-name{font-weight:700;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.reg-sub{font-size:10px;color:#999}
+.badge{padding:3px 9px;border-radius:20px;font-size:10px;font-weight:800;white-space:nowrap}
+.badge.present{background:#e8f5e9;color:#2e7d32}
+.badge.absent{background:#ffebee;color:#c62828}
+.badge.pending{background:#fff8e1;color:#f57f17}
+.badge.open{background:#e8f5e9;color:#2e7d32}
+.badge.closed{background:#e0e0e0;color:#666}
+.badge.expired{background:#fff3e0;color:#e65100}
+.mark-btn{font-size:11px;padding:3px 8px;border-radius:5px;border:none;cursor:pointer;font-weight:700}
+.mark-present{background:#e8f5e9;color:#2e7d32}.mark-present:hover{background:#c8e6c9}
+.mark-absent{background:#ffebee;color:#c62828}.mark-absent:hover{background:#ffcdd2}
+
+.filter-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.filter-bar input,.filter-bar select{padding:8px 11px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:12px}
+.filter-bar input{flex:1;min-width:140px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{background:#003b1f;color:white;padding:10px 12px;text-align:left;font-weight:700;white-space:nowrap}
+tbody tr{border-bottom:1px solid #f5f5f5;transition:background .15s}
+tbody tr:hover{background:#f9f9f9}
+tbody td{padding:9px 12px;vertical-align:middle}
+.no-data{text-align:center;color:#ccc;padding:40px;font-size:13px}
+
+.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:700px){.admin-grid{grid-template-columns:1fr}}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:11px;font-weight:700;color:#555;margin-bottom:5px;text-transform:uppercase;letter-spacing:.3px}
+.form-group input,.form-group select{width:100%;padding:10px 12px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:13px}
+.form-group input:focus,.form-group select:focus{outline:none;border-color:#006633}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:white;border-radius:14px;width:480px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden}
+.modal-head{background:#003b1f;color:white;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.modal-head h3{font-size:15px;font-weight:800}
+.modal-close{background:none;border:none;color:white;font-size:20px;cursor:pointer}
+.modal-body{padding:22px}
+.modal-foot{padding:14px 22px;border-top:1px solid #f0f0f0;display:flex;justify-content:flex-end;gap:8px}
+
+.loader{display:inline-block;width:14px;height:14px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:5px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.page-loader{text-align:center;padding:40px;color:#aaa;font-size:13px}
+
+#toast{position:fixed;bottom:22px;right:22px;padding:12px 18px;border-radius:8px;color:white;font-size:13px;font-weight:700;display:none;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.25);max-width:320px}
+#toast.show{display:block;animation:tin .3s}
+#toast.ok{background:#2e7d32}#toast.err{background:#c62828}#toast.warn{background:#e65100}#toast.info{background:#1565c0}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginPage">
+  <div class="login-wrap">
+    <div class="login-header">
+      <div class="icon">🎓</div>
+      <h2>UNIVERSITY ATTENDANCE SYSTEM</h2>
+      <p>Student Attendance Management Portal</p>
+    </div>
+    <div class="login-body">
+      <label>Staff ID / Username</label>
+      <input type="text" id="uname" placeholder="Enter your username" />
+      <label>Password</label>
+      <input type="password" id="upass" placeholder="Enter your password" onkeydown="if(event.key==='Enter')doLogin()" />
+      <button class="login-btn" id="loginBtn" onclick="doLogin()">Sign In to Portal</button>
+      <div class="login-err" id="loginErr"></div>
+      <div class="demo-hint">admin / admin123 &nbsp;·&nbsp; dr.kamau / pass123 &nbsp;·&nbsp; prof.akinyi / pass123</div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none;flex-direction:column">
+  <div class="topbar">
+    <div class="topbar-brand">
+      <div class="name">🎓 UNIVERSITY ATTENDANCE SYSTEM</div>
+      <div class="sub">Student Attendance Management Portal</div>
+    </div>
+    <div class="topbar-right">
+      <div><div class="user" id="topUser"></div><div class="role" id="topRole"></div></div>
+      <button class="logout-btn" onclick="doLogout()">Sign Out</button>
+    </div>
+  </div>
+  <div class="goldbar">
+    <span>📅 <span id="dateLabel"></span></span>
+    <span id="activeSessionsBadge"></span>
+  </div>
+  <div class="navtabs">
+    <div class="tab active"    onclick="showPage('pgDashboard',this)">📊 Dashboard</div>
+    <div class="tab"           onclick="showPage('pgSessions',this)">🔓 Sessions</div>
+    <div class="tab"           onclick="showPage('pgAttendance',this)">📡 Take Attendance</div>
+    <div class="tab"           onclick="showPage('pgLog',this)">📋 Log</div>
+    <div class="tab admin-only" onclick="showPage('pgEnroll',this)">💳 Cards</div>
+    <div class="tab admin-only" onclick="showPage('pgStudents',this)">👥 Students</div>
+    <div class="tab admin-only" onclick="showPage('pgLecturers',this)">🎓 Lecturers</div>
+    <div class="tab admin-only" onclick="showPage('pgCourses',this)">📚 Courses</div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="pgDashboard">
+    <div class="stats">
+      <div class="stat s1"><div class="icon2">👥</div><div class="num" id="sTotal">—</div><div class="lbl">Students</div></div>
+      <div class="stat s5"><div class="icon2">🔓</div><div class="num" id="sActiveSess">—</div><div class="lbl">Active Sessions</div></div>
+      <div class="stat s2"><div class="icon2">✅</div><div class="num" id="sPresent">—</div><div class="lbl">Present Today</div></div>
+      <div class="stat s3"><div class="icon2">❌</div><div class="num" id="sAbsent">—</div><div class="lbl">Not Scanned</div></div>
+      <div class="stat s4"><div class="icon2">📈</div><div class="num" id="sPct">—</div><div class="lbl">Rate</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+      <div class="card"><div class="card-head"><h3>🔓 Live Sessions</h3><button class="btn btn-outline btn-sm" onclick="showPage('pgSessions',document.querySelectorAll('.tab')[1])">Manage</button></div><div id="dashSessions"><p class="no-data">No active sessions.</p></div></div>
+      <div class="card"><div class="card-head"><h3>📋 Recent Scans</h3></div><div id="recentScans"><p class="no-data">No scans yet.</p></div></div>
+    </div>
+    <div class="card"><div class="card-head"><h3>📊 Department Summary</h3></div><div id="deptSummary"></div></div>
+  </div>
+
+  <!-- SESSIONS -->
+  <div class="page" id="pgSessions">
+    <div class="admin-grid">
+      <div class="card">
+        <div class="card-head"><h3>🔓 Open New Session</h3></div>
+        <p style="font-size:12px;color:#777;margin-bottom:14px">Open a session to allow students to mark attendance for a specific class.</p>
+        <div class="session-open-form">
+          <select id="sessCourse"><option>Loading...</option></select>
+          <select id="sessYear"><option>Year 1</option><option selected>Year 2</option><option>Year 3</option><option>Year 4</option></select>
+          <select id="sessDept"><option>Computer Science</option><option>Information Technology</option><option>Mathematics</option><option>Engineering</option><option>Agriculture</option></select>
+          <select id="sessRoom"><option>LH 1</option><option>LH 2</option><option>LH 3</option><option>Lab 1</option><option>Lab 2</option></select>
+        </div>
+        <div class="duration-row">
+          <label>⏱ Auto-close after</label>
+          <input type="number" id="sessDuration" value="15" min="1" max="120" />
+          <span style="font-size:12px;color:#777">minutes</span>
+        </div>
+        <button class="btn btn-primary" style="width:100%;padding:12px" onclick="openSession()">🔓 Open Attendance Session</button>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>📋 Active & Recent Sessions</h3><button class="btn btn-outline btn-sm" onclick="loadSessions()">🔄 Refresh</button></div>
+        <div id="sessionsList"><div class="page-loader">Loading...</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>📅 Session History</h3></div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>Course</th><th>Dept</th><th>Lecturer</th><th>Room</th><th>Opened</th><th>Closed</th><th>Scans</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="sessionHistoryBody"></tbody>
+        </table>
+      </div>
+      <div class="no-data" id="noSessionHistory" style="display:none">No session history yet.</div>
+    </div>
+  </div>
+
+  <!-- TAKE ATTENDANCE -->
+  <div class="page" id="pgAttendance">
+    <div class="scan-grid">
+      <div>
+        <div class="card">
+          <div class="card-head"><h3>📡 Card Reader</h3></div>
+          <div id="scanSessionSelector">
+            <div class="no-session-warn" id="noSessionWarn" style="display:none">⚠️ No active session! Open a session first from the Sessions tab.</div>
+            <div class="session-selector" id="sessionSelectorWrap" style="display:none">
+              <label>Active Session</label>
+              <select id="activeSessSelect" onchange="onSessSelect()"></select>
+            </div>
+          </div>
+          <div class="scan-zone" id="scanZone">
+            <div class="scan-icon">💳</div>
+            <div class="scan-msg" id="scanMsg">Select an active session above, then tap a card</div>
+          </div>
+          <div class="scan-input-row">
+            <input type="text" id="scanInput" placeholder="Tap RFID card or type UID..." onkeydown="if(event.key==='Enter')doScan()" />
+            <button onclick="doScan()">▶ Mark</button>
+          </div>
+          <div id="scanTimerBar" style="margin-top:12px;display:none">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#555;margin-bottom:4px">
+              <span>Session closes in</span><span id="scanTimerLabel">—</span>
+            </div>
+            <div style="background:#e0e0e0;border-radius:10px;height:6px;overflow:hidden">
+              <div id="scanTimerFill" style="height:100%;background:#006633;border-radius:10px;transition:width 1s linear;width:100%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <h3>👥 Student Register <span id="regCount" class="badge pending" style="margin-left:6px"></span></h3>
+          <div class="actions">
+            <button class="btn btn-outline btn-sm" onclick="markAllPresent()">✅ All Present</button>
+          </div>
+        </div>
+        <div class="reg-list" id="regList"><div class="page-loader">Loading students...</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOG -->
+  <div class="page" id="pgLog">
+    <div class="card">
+      <div class="card-head"><h3>📋 Attendance Log</h3>
+        <div class="actions">
+          <button class="btn btn-outline btn-sm" onclick="printLog()">🖨 Print</button>
+          <button class="btn btn-gold btn-sm" onclick="exportCSV()">⬇ CSV</button>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <input type="text" id="fName" placeholder="Search name or reg. no..." oninput="renderLog()" />
+        <select id="fStatus" onchange="loadLog()"><option value="">All Status</option><option>Present</option><option>Absent</option></select>
+        <select id="fDept" onchange="loadLog()"><option value="">All Departments</option></select>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>#</th><th>Reg. No.</th><th>Name</th><th>Dept</th><th>Year</th><th>Course</th><th>Time</th><th>Status</th><th id="actionHead">Action</th></tr></thead>
+          <tbody id="logBody"></tbody>
+        </table>
+      </div>
+      <div class="no-data" id="noLogData" style="display:none">No records found.</div>
+    </div>
+  </div>
+
+  <!-- CARDS -->
+  <div class="page" id="pgEnroll">
+    <div class="admin-grid">
+      <div class="card">
+        <div class="card-head"><h3>💳 Enroll RFID Card</h3></div>
+        <p style="font-size:12px;color:#777;margin-bottom:16px">Select a student then tap their RFID card to link it.</p>
+        <div class="form-group"><label>Student</label>
+          <select id="enrollStudent" style="width:100%;padding:10px 12px;border:1.5px solid #e0e0e0;border-radius:7px;font-size:13px"><option value="">— Choose student —</option></select>
+        </div>
+        <div class="form-group"><label>Scan Card / Enter UID</label>
+          <div class="scan-input-row">
+            <input type="text" id="enrollUid" placeholder="Tap RFID card or type UID..." style="font-family:monospace" onkeydown="if(event.key==='Enter')enrollCard()" />
+            <button onclick="enrollCard()">💾 Enroll</button>
+          </div>
+        </div>
+        <div id="enrollResult" style="margin-top:12px;padding:12px;border-radius:8px;font-size:13px;display:none"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>📋 Enrolled Cards <span id="enrolledCount" class="badge present"></span></h3></div>
+        <div class="admin-table-wrap">
+          <table><thead><tr><th>Reg. No.</th><th>Name</th><th>Card UID</th><th>Enrolled</th><th>Action</th></tr></thead>
+          <tbody id="enrollTableBody"></tbody></table>
+        </div>
+        <div class="no-data" id="noEnrollData" style="display:none">No cards enrolled yet.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STUDENTS -->
+  <div class="page" id="pgStudents">
+    <div class="admin-grid">
+      <div class="card">
+        <div class="card-head"><h3>➕ Add / Edit Student</h3></div>
+        <input type="hidden" id="editStudentId" />
+        <div class="form-group"><label>Reg. No.</label><input type="text" id="fRegNo" placeholder="EG/YYYY/NNN" /></div>
+        <div class="form-group"><label>Full Name</label><input type="text" id="fSName" /></div>
+        <div class="form-row">
+          <div class="form-group"><label>Department</label><select id="fSDept"><option>Computer Science</option><option>Information Technology</option><option>Mathematics</option><option>Engineering</option><option>Agriculture</option><option>Education</option></select></div>
+          <div class="form-group"><label>Year</label><select id="fSYear"><option>Y1</option><option>Y2</option><option>Y3</option><option>Y4</option></select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Intake</label><input type="text" id="fIntake" placeholder="e.g. 2022" /></div>
+          <div class="form-group"><label>Gender</label><select id="fGender"><option>Male</option><option>Female</option></select></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary" onclick="saveStudent()">💾 Save</button>
+          <button class="btn btn-outline" onclick="clearStudentForm()">✕ Clear</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>👥 All Students <span id="studentCount" class="badge pending"></span></h3>
+          <input type="text" id="searchStudents" placeholder="Search..." style="padding:6px 10px;border:1.5px solid #e0e0e0;border-radius:6px;font-size:12px" oninput="filterStudentTable()" />
+        </div>
+        <div class="admin-table-wrap"><table><thead><tr><th>Reg. No.</th><th>Name</th><th>Dept</th><th>Year</th><th>Card</th><th>Actions</th></tr></thead><tbody id="studentTableBody"></tbody></table></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LECTURERS -->
+  <div class="page" id="pgLecturers">
+    <div class="admin-grid">
+      <div class="card">
+        <div class="card-head"><h3>➕ Add / Edit Lecturer</h3></div>
+        <input type="hidden" id="editLecId" />
+        <div class="form-group"><label>Username</label><input type="text" id="fLUser" /></div>
+        <div class="form-group"><label>Full Name</label><input type="text" id="fLName" /></div>
+        <div class="form-row">
+          <div class="form-group"><label>Title</label><select id="fLTitle"><option>Dr.</option><option>Prof.</option><option>Mr.</option><option>Mrs.</option><option>Ms.</option></select></div>
+          <div class="form-group"><label>Role</label><select id="fLRole"><option value="lecturer">Lecturer</option><option value="admin">Admin</option></select></div>
+        </div>
+        <div class="form-group"><label>Department</label><select id="fLDept"><option>Computer Science</option><option>Information Technology</option><option>Mathematics</option><option>Engineering</option><option>Agriculture</option><option>Registry</option></select></div>
+        <div class="form-group"><label>Password</label><input type="password" id="fLPass" placeholder="Leave blank to keep existing" /></div>
+        <div style="display:flex;gap:8px"><button class="btn btn-primary" onclick="saveLecturer()">💾 Save</button><button class="btn btn-outline" onclick="clearLecForm()">✕ Clear</button></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>🎓 All Lecturers</h3></div>
+        <div class="admin-table-wrap"><table><thead><tr><th>Username</th><th>Name</th><th>Dept</th><th>Role</th><th>Actions</th></tr></thead><tbody id="lecTableBody"></tbody></table></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COURSES -->
+  <div class="page" id="pgCourses">
+    <div class="admin-grid">
+      <div class="card">
+        <div class="card-head"><h3>➕ Add / Edit Course</h3></div>
+        <input type="hidden" id="editCourseId" />
+        <div class="form-group"><label>Course Code</label><input type="text" id="fCCode" placeholder="e.g. SCS 201" /></div>
+        <div class="form-group"><label>Course Name</label><input type="text" id="fCName" /></div>
+        <div class="form-row">
+          <div class="form-group"><label>Department</label><select id="fCDept"><option>Computer Science</option><option>Information Technology</option><option>Mathematics</option><option>Engineering</option><option>Agriculture</option></select></div>
+          <div class="form-group"><label>Year</label><select id="fCYear"><option>Year 1</option><option>Year 2</option><option>Year 3</option><option>Year 4</option></select></div>
+        </div>
+        <div style="display:flex;gap:8px"><button class="btn btn-primary" onclick="saveCourse()">💾 Save</button><button class="btn btn-outline" onclick="clearCourseForm()">✕ Clear</button></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>📚 All Courses</h3></div>
+        <div class="admin-table-wrap"><table><thead><tr><th>Code</th><th>Name</th><th>Dept</th><th>Year</th><th>Actions</th></tr></thead><tbody id="courseTableBody"></tbody></table></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-head"><h3 id="modalTitle">Confirm</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot"><button class="btn btn-outline" onclick="closeModal()">Cancel</button><button class="btn btn-danger" id="modalConfirmBtn">Delete</button></div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+const API = 'http://localhost:5069/api';
+let token = '', currentUser = null;
+let allStudents = [], allLog = [], activeSessions = [];
+let todayAttendance = {};
+let timerIntervals = {};
+let pollInterval = null;
+
+// ═══════════ API HELPER ═══════════
+async function api(endpoint, method='GET', body=null){
+  const opts={method,headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`}:{})}};
+  if(body) opts.body=JSON.stringify(body);
+  const res=await fetch(`${API}${endpoint}`,opts);
+  if(res.status===204) return null;
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok) throw new Error(data.message||`Error ${res.status}`);
+  return data;
+}
+
+// ═══════════ AUTH ═══════════
+async function doLogin(){
+  const btn=document.getElementById('loginBtn');
+  const u=document.getElementById('uname').value.trim();
+  const p=document.getElementById('upass').value.trim();
+  if(!u||!p){showLoginErr('Enter username and password.');return;}
+  btn.disabled=true; btn.innerHTML='<span class="loader"></span>Signing in...';
+  document.getElementById('loginErr').style.display='none';
+  try{
+    const data=await api('/auth/login','POST',{username:u,password:p});
+    token=data.token; currentUser=data;
+    document.getElementById('loginPage').style.display='none';
+    document.getElementById('app').style.display='flex';
+    document.getElementById('topUser').textContent='👤 '+(data.title?data.title+' ':'')+data.name;
+    document.getElementById('topRole').textContent=data.role==='admin'?'Administrator':'Lecturer';
+    document.getElementById('dateLabel').textContent=new Date().toDateString();
+    document.querySelectorAll('.admin-only').forEach(el=>el.style.display=data.role==='admin'?'':'none');
+    document.getElementById('actionHead').style.display=data.role==='admin'?'':'none';
+    await Promise.all([loadStudents(),loadCourses()]);
+    loadDashboard();
+    // Poll sessions every 10 seconds
+    pollInterval=setInterval(()=>{loadActiveSessions();loadDashboard();},10000);
+  }catch(e){showLoginErr(e.message||'Cannot connect to server. Is the API running on port 5069?');}
+  finally{btn.disabled=false;btn.innerHTML='Sign In to Portal';}
+}
+function showLoginErr(msg){const el=document.getElementById('loginErr');el.textContent='❌ '+msg;el.style.display='block';}
+function doLogout(){
+  clearInterval(pollInterval);
+  Object.values(timerIntervals).forEach(clearInterval);
+  token='';currentUser=null;allStudents=[];allLog=[];activeSessions=[];todayAttendance={};
+  document.getElementById('uname').value='';document.getElementById('upass').value='';
+  document.getElementById('loginErr').style.display='none';
+  document.getElementById('loginPage').style.display='flex';
+  document.getElementById('app').style.display='none';
+  showPage('pgDashboard',document.querySelector('.tab'));
+}
+
+// ═══════════ NAV ═══════════
+function showPage(id,tab){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(tab) tab.classList.add('active');
+  if(id==='pgDashboard')  loadDashboard();
+  if(id==='pgSessions')   {loadSessions();loadSessionHistory();}
+  if(id==='pgAttendance') {loadActiveSessions().then(refreshScannerSession);}
+  if(id==='pgLog')        {populateDeptFilter();loadLog();}
+  if(id==='pgStudents')   renderStudentTable();
+  if(id==='pgLecturers')  loadLecturers();
+  if(id==='pgCourses')    loadCoursesTable();
+  if(id==='pgEnroll')     {populateEnrollSelect();renderEnrollTable();document.getElementById('enrollUid').focus();}
+}
+
+// ═══════════ LOADERS ═══════════
+async function loadStudents(){allStudents=await api('/students');renderStudentTable();renderRegList();}
+async function loadCourses(){
+  const courses=await api('/courses');
+  const opts=courses.map(c=>`<option value="${c.id}" data-code="${c.code}" data-name="${c.name}">${c.code} – ${c.name}</option>`).join('');
+  document.getElementById('sessCourse').innerHTML=opts;
+}
+
+async function loadActiveSessions(){
+  try{
+    activeSessions=await api('/sessions/active');
+    document.getElementById('activeSessionsBadge').textContent=
+      activeSessions.length?`🔓 ${activeSessions.length} active session${activeSessions.length>1?'s':''}`:'';
+    document.getElementById('sActiveSess').textContent=activeSessions.length;
+  }catch(e){}
+  return activeSessions;
+}
+
+async function loadDashboard(){
+  try{
+    const stats=await api('/attendance/stats');
+    document.getElementById('sTotal').textContent=stats.totalStudents;
+    document.getElementById('sPresent').textContent=stats.present;
+    document.getElementById('sAbsent').textContent=stats.totalStudents-stats.present;
+    document.getElementById('sPct').textContent=stats.totalStudents?Math.round(stats.present/stats.totalStudents*100)+'%':'0%';
+    document.getElementById('sActiveSess').textContent=stats.activeSessions;
+    renderDeptSummary(stats.byDept,stats.totalStudents);
+  }catch(e){}
+  loadRecentScans();
+  loadActiveSessions().then(renderDashSessions);
+}
+
+async function loadRecentScans(){
+  try{
+    const recs=await api('/attendance');
+    const el=document.getElementById('recentScans');
+    if(!recs.length){el.innerHTML='<p class="no-data">No scans yet.</p>';return;}
+    el.innerHTML=recs.slice(0,5).map(r=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f5f5f5">
+        <div style="width:34px;height:34px;border-radius:50%;background:#006633;color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0">${r.studentName.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>
+        <div style="flex:1"><div style="font-weight:700;font-size:12px">${r.studentName}</div><div style="font-size:10px;color:#999">${r.studentRegNo} · ${r.timeIn} · ${r.courseName||r.courseCode}</div></div>
+        <span class="badge ${r.status.toLowerCase()}">${r.status}</span>
+      </div>`).join('');
+  }catch(e){}
+}
+
+function renderDeptSummary(byDept,total){
+  const el=document.getElementById('deptSummary');
+  const depts=[...new Set(allStudents.map(s=>s.department))];
+  el.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px">'+depts.map(d=>{
+    const dTotal=allStudents.filter(s=>s.department===d).length;
+    const entry=(byDept||[]).find(x=>x.dept===d);
+    const present=entry?entry.count:0;
+    const pct=dTotal?Math.round(present/dTotal*100):0;
+    return `<div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="font-weight:700">${d}</span><span style="color:#888">${present}/${dTotal} (${pct}%)</span></div>
+      <div style="background:#f0f0f0;border-radius:20px;height:8px;overflow:hidden"><div style="background:#006633;height:100%;width:${pct}%;border-radius:20px"></div></div></div>`;
+  }).join('')+'</div>';
+}
+
+function renderDashSessions(){
+  const el=document.getElementById('dashSessions');
+  if(!activeSessions.length){el.innerHTML='<p class="no-data">No active sessions. Open one from the Sessions tab.</p>';return;}
+  el.innerHTML=activeSessions.map(s=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f5f5f5">
+      <span class="status-dot open"></span>
+      <div style="flex:1"><div style="font-weight:700;font-size:13px">${s.courseCode} – ${s.courseName}</div>
+      <div style="font-size:10px;color:#777">${s.lecturerName} · Room ${s.room} · ${s.scansCount} scanned</div></div>
+      <span style="font-size:11px;font-weight:700;color:#006633">${formatSecs(s.secondsLeft)}</span>
+    </div>`).join('');
+}
+
+// ═══════════ SESSIONS ═══════════
+async function loadSessions(){
+  await loadActiveSessions();
+  const el=document.getElementById('sessionsList');
+  if(!activeSessions.length){el.innerHTML='<p class="no-data">No active sessions right now.</p>';return;}
+  el.innerHTML='<div class="active-sessions">'+activeSessions.map(s=>buildSessionCard(s)).join('')+'</div>';
+  activeSessions.forEach(s=>startSessionTimer(s));
+}
+
+function buildSessionCard(s){
+  const pct=Math.min(100,Math.round(s.secondsLeft/(s.durationMins*60)*100));
+  const fillClass=s.secondsLeft<60?'danger':s.secondsLeft<300?'warn':'';
+  return `<div class="session-card" id="sc_${s.id}">
+    <div class="sc-head">
+      <div><div class="sc-title"><span class="status-dot ${s.status}"></span>${s.courseCode} – ${s.courseName}</div>
+      <div class="sc-sub">👤 ${s.lecturerName} &nbsp;·&nbsp; 📍 ${s.room} &nbsp;·&nbsp; 📅 ${s.year} &nbsp;·&nbsp; 👥 ${s.scansCount} scanned</div></div>
+      <div class="sc-actions">
+        <button class="btn btn-warn btn-sm" onclick="extendSession('${s.id}')">+10 min</button>
+        <button class="btn btn-danger btn-sm" onclick="closeSession('${s.id}')">Close</button>
+      </div>
+    </div>
+    <div class="timer-bar"><div class="timer-fill ${fillClass}" id="tf_${s.id}" style="width:${pct}%"></div></div>
+    <div class="timer-label" id="tl_${s.id}">${formatSecs(s.secondsLeft)} remaining</div>
+  </div>`;
+}
+
+function startSessionTimer(s){
+  if(timerIntervals[s.id]) clearInterval(timerIntervals[s.id]);
+  let secs=s.secondsLeft;
+  const totalSecs=s.durationMins*60;
+  timerIntervals[s.id]=setInterval(()=>{
+    secs--;
+    const fill=document.getElementById('tf_'+s.id);
+    const lbl=document.getElementById('tl_'+s.id);
+    const card=document.getElementById('sc_'+s.id);
+    if(!fill){clearInterval(timerIntervals[s.id]);return;}
+    const pct=Math.max(0,Math.round(secs/totalSecs*100));
+    fill.style.width=pct+'%';
+    fill.className='timer-fill'+(secs<60?' danger':secs<300?' warn':'');
+    lbl.textContent=secs>0?formatSecs(secs)+' remaining':'Session expired';
+    if(secs<=0){
+      card.classList.add('expired');
+      clearInterval(timerIntervals[s.id]);
+      loadSessions();loadActiveSessions();refreshScannerSession();
+    }
+  },1000);
+}
+
+async function loadSessionHistory(){
+  try{
+    const all=await api('/sessions');
+    const el=document.getElementById('sessionHistoryBody');
+    document.getElementById('noSessionHistory').style.display=all.length?'none':'block';
+    el.innerHTML=all.map(s=>`<tr>
+      <td><b>${s.courseCode}</b><br><span style="font-size:10px;color:#999">${s.courseName}</span></td>
+      <td>${s.department}</td><td>${s.lecturerName}</td><td>${s.room}</td>
+      <td>${new Date(s.openedAt).toLocaleTimeString()}</td>
+      <td>${s.closedAt?new Date(s.closedAt).toLocaleTimeString():'—'}</td>
+      <td>${s.scansCount}</td>
+      <td><span class="badge ${s.status}">${s.status}</span></td>
+      <td>${s.status==='open'?`<button class="btn-icon" onclick="closeSession('${s.id}')">🔒</button>`:'—'}</td>
+    </tr>`).join('');
+  }catch(e){}
+}
+
+async function openSession(){
+  const sel=document.getElementById('sessCourse');
+  const opt=sel.options[sel.selectedIndex];
+  const dur=parseInt(document.getElementById('sessDuration').value)||15;
+  try{
+    await api('/sessions/open','POST',{
+      courseCode:opt.dataset.code, courseName:opt.dataset.name,
+      department:document.getElementById('sessDept').value,
+      year:document.getElementById('sessYear').value,
+      room:document.getElementById('sessRoom').value,
+      durationMins:dur
+    });
+    showToast('Session opened! Students can now tap cards.','ok');
+    loadSessions(); loadSessionHistory(); loadActiveSessions();
+  }catch(e){showToast(e.message,'err');}
+}
+
+async function closeSession(id){
+  try{await api(`/sessions/${id}/close`,'POST');showToast('Session closed','warn');loadSessions();loadSessionHistory();loadActiveSessions();refreshScannerSession();}
+  catch(e){showToast(e.message,'err');}
+}
+
+async function extendSession(id){
+  try{const r=await api(`/sessions/${id}/extend?minutes=10`,'POST');showToast('Extended by 10 minutes','ok');loadSessions();}
+  catch(e){showToast(e.message,'err');}
+}
+
+// ═══════════ SCANNER ═══════════
+async function refreshScannerSession(){
+  const wrap=document.getElementById('sessionSelectorWrap');
+  const warn=document.getElementById('noSessionWarn');
+  const sel=document.getElementById('activeSessSelect');
+  const timerDiv=document.getElementById('scanTimerBar');
+  if(!activeSessions.length){
+    wrap.style.display='none'; warn.style.display='block'; timerDiv.style.display='none';
+    document.getElementById('scanZone').className='scan-zone locked';
+    document.getElementById('scanMsg').textContent='⚠️ No active session — lecturer must open attendance first.';
+    return;
+  }
+  warn.style.display='none'; wrap.style.display='block';
+  sel.innerHTML=activeSessions.map(s=>`<option value="${s.id}" data-code="${s.courseCode}" data-name="${s.courseName}" data-secs="${s.secondsLeft}" data-total="${s.durationMins*60}">${s.courseCode} – ${s.courseName} (${formatSecs(s.secondsLeft)} left)</option>`).join('');
+  onSessSelect();
+}
+
+function onSessSelect(){
+  const sel=document.getElementById('activeSessSelect');
+  const opt=sel.options[sel.selectedIndex];
+  if(!opt) return;
+  const secs=parseInt(opt.dataset.secs)||0;
+  const total=parseInt(opt.dataset.total)||900;
+  const pct=Math.min(100,Math.round(secs/total*100));
+  document.getElementById('scanTimerBar').style.display='block';
+  document.getElementById('scanTimerLabel').textContent=formatSecs(secs);
+  const fill=document.getElementById('scanTimerFill');
+  fill.style.width=pct+'%';
+  fill.style.background=secs<60?'#c62828':secs<300?'#ff6f00':'#006633';
+  document.getElementById('scanZone').className='scan-zone';
+  document.getElementById('scanMsg').textContent='Ready — Tap or swipe student RFID card';
+  document.getElementById('scanInput').focus();
+}
+
+async function doScan(){
+  const inp=document.getElementById('scanInput');
+  const uid=inp.value.trim(); inp.value='';
+  const zone=document.getElementById('scanZone');
+  const msg=document.getElementById('scanMsg');
+  if(!uid){showToast('Please tap or scan a card','warn');return;}
+  // Get selected session
+  const sel=document.getElementById('activeSessSelect');
+  const opt=sel?.options[sel.selectedIndex];
+  if(!opt){showToast('No active session selected','err');return;}
+  const courseCode=opt.dataset.code;
+  const courseName=opt.dataset.name;
+  zone.className='scan-zone scanning';
+  try{
+    const record=await api('/attendance/mark','POST',{cardUid:uid,courseCode,courseName,status:'Present'});
+    todayAttendance[record.studentRegNo]=record;
+    zone.className='scan-zone success';
+    msg.textContent=`✅ ${record.studentName} — Present at ${record.timeIn}`;
+    showToast(record.studentName+' ✓ Present','ok');
+    setTimeout(()=>{zone.className='scan-zone';msg.textContent='Ready — Tap or swipe student RFID card';},2500);
+    renderRegList(); loadDashboard();
+  }catch(e){
+    zone.className='scan-zone error';
+    msg.textContent='❌ '+(e.message||'Error');
+    showToast(e.message||'Scan failed','err');
+    setTimeout(()=>{zone.className='scan-zone';msg.textContent='Ready — Tap or swipe student RFID card';},3000);
+  }
+  inp.focus();
+}
+
+async function manualMark(regNo,status){
+  const sel=document.getElementById('activeSessSelect');
+  const opt=sel?.options[sel.selectedIndex];
+  if(!opt){showToast('No active session — open a session first','warn');return;}
+  try{
+    const record=await api('/attendance/mark','POST',{studentRegNo:regNo,courseCode:opt.dataset.code,courseName:opt.dataset.name,status});
+    todayAttendance[regNo]=record;
+    showToast(record.studentName+' marked '+status,status==='Present'?'ok':'warn');
+    renderRegList(); loadDashboard();
+  }catch(e){showToast(e.message,'err');}
+}
+
+async function markAllPresent(){
+  for(const s of allStudents){if(!todayAttendance[s.regNo]) await manualMark(s.regNo,'Present');}
+}
+
+function renderRegList(){
+  const el=document.getElementById('regList');
+  const p=Object.keys(todayAttendance).length;
+  document.getElementById('regCount').textContent=p+'/'+allStudents.length;
+  if(!allStudents.length){el.innerHTML='<div class="page-loader">Loading...</div>';return;}
+  el.innerHTML=allStudents.map(s=>{
+    const a=todayAttendance[s.regNo];
+    const status=a?a.status:'Pending';
+    const bc=status==='Present'?'present':status==='Absent'?'absent':'pending';
+    const initials=s.name.split(' ').map(w=>w[0]).join('').slice(0,2);
+    return `<div class="reg-item">
+      <div class="reg-avatar">${initials}</div>
+      <div class="reg-info"><div class="reg-name">${s.name}</div><div class="reg-sub">${s.regNo} · ${s.department}</div></div>
+      <span class="badge ${bc}">${status}</span>
+      <button class="mark-btn mark-present" onclick="manualMark('${s.regNo}','Present')">✓</button>
+      <button class="mark-btn mark-absent"  onclick="manualMark('${s.regNo}','Absent')">✗</button>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════ LOG ═══════════
+async function loadLog(){
+  const st=document.getElementById('fStatus').value;
+  const dp=document.getElementById('fDept').value;
+  let url='/attendance?';
+  if(st) url+=`status=${st}&`;
+  if(dp) url+=`dept=${encodeURIComponent(dp)}&`;
+  try{allLog=await api(url);renderLog();}catch(e){showToast('Failed to load log','err');}
+}
+function renderLog(){
+  const q=document.getElementById('fName').value.toLowerCase();
+  const rows=allLog.filter(r=>!q||r.studentName.toLowerCase().includes(q)||r.studentRegNo.toLowerCase().includes(q));
+  document.getElementById('noLogData').style.display=rows.length?'none':'block';
+  const isAdmin=currentUser?.role==='admin';
+  document.getElementById('logBody').innerHTML=rows.map((r,i)=>`<tr>
+    <td>${i+1}</td><td><b>${r.studentRegNo}</b></td><td>${r.studentName}</td><td>${r.department}</td>
+    <td>${r.year}</td><td>${r.courseName||r.courseCode||'—'}</td><td>${r.timeIn}</td>
+    <td><span class="badge ${r.status.toLowerCase()}">${r.status}</span></td>
+    <td>${isAdmin?`<button class="btn-icon" onclick="deleteLog('${r.id}')">🗑</button>`:'—'}</td>
+  </tr>`).join('');
+}
+async function deleteLog(id){
+  try{await api(`/attendance/${id}`,'DELETE');showToast('Record removed','warn');loadLog();loadDashboard();}
+  catch(e){showToast(e.message,'err');}
+}
+function populateDeptFilter(){
+  const sel=document.getElementById('fDept');
+  const depts=[...new Set(allStudents.map(s=>s.department))].sort();
+  sel.innerHTML='<option value="">All Departments</option>'+depts.map(d=>`<option>${d}</option>`).join('');
+}
+
+// ═══════════ CARD ENROLLMENT ═══════════
+function populateEnrollSelect(){
+  const sel=document.getElementById('enrollStudent');
+  sel.innerHTML='<option value="">— Choose student —</option>'+
+    allStudents.map(s=>`<option value="${s.id}">${s.regNo} — ${s.name}${s.cardUid?' ✅':''}</option>`).join('');
+}
+function renderEnrollTable(){
+  const enrolled=allStudents.filter(s=>s.cardUid);
+  document.getElementById('enrolledCount').textContent=enrolled.length+' enrolled';
+  document.getElementById('noEnrollData').style.display=enrolled.length?'none':'block';
+  document.getElementById('enrollTableBody').innerHTML=enrolled.map(s=>`<tr>
+    <td><b>${s.regNo}</b></td><td>${s.name}</td>
+    <td style="font-family:monospace;color:#006633">${s.cardUid}</td>
+    <td style="font-size:11px;color:#999">${s.cardEnrolledAt?new Date(s.cardEnrolledAt).toLocaleDateString():'—'}</td>
+    <td><button class="btn-icon" onclick="removeCard('${s.id}','${s.name}')">🗑</button></td>
+  </tr>`).join('');
+}
+async function enrollCard(){
+  const studentId=document.getElementById('enrollStudent').value;
+  const uid=document.getElementById('enrollUid').value.trim();
+  const resultEl=document.getElementById('enrollResult');
+  if(!studentId){showToast('Select a student','warn');return;}
+  if(!uid){showToast('Scan or enter a card UID','warn');return;}
+  try{
+    const res=await api('/students/enroll-card','POST',{studentId,cardUid:uid});
+    resultEl.style.display='block';resultEl.style.background='#e8f5e9';resultEl.style.color='#2e7d32';
+    resultEl.innerHTML=`✅ <b>${res.student.name}</b> — Card <code>${uid}</code> enrolled!`;
+    document.getElementById('enrollUid').value='';
+    document.getElementById('enrollStudent').value='';
+    showToast(res.message,'ok');
+    await loadStudents(); populateEnrollSelect(); renderEnrollTable();
+  }catch(e){
+    resultEl.style.display='block';resultEl.style.background='#ffebee';resultEl.style.color='#c62828';
+    resultEl.innerHTML='❌ '+(e.message||'Enrollment failed');
+    showToast(e.message||'Enrollment failed','err');
+  }
+}
+async function removeCard(id,name){
+  if(!confirm(`Remove card from ${name}?`)) return;
+  try{await api(`/students/${id}/card`,'DELETE');showToast('Card removed from '+name,'warn');await loadStudents();populateEnrollSelect();renderEnrollTable();}
+  catch(e){showToast(e.message,'err');}
+}
+
+// ═══════════ ADMIN: STUDENTS ═══════════
+function renderStudentTable(){
+  document.getElementById('studentCount').textContent=allStudents.length;
+  filterStudentTable();
+}
+function filterStudentTable(){
+  const q=(document.getElementById('searchStudents')?.value||'').toLowerCase();
+  const rows=allStudents.filter(s=>!q||s.name.toLowerCase().includes(q)||s.regNo.toLowerCase().includes(q));
+  document.getElementById('studentTableBody').innerHTML=rows.map(s=>`<tr>
+    <td><b>${s.regNo}</b></td><td>${s.name}</td><td>${s.department}</td><td>${s.year}</td>
+    <td>${s.cardUid?`<span style="font-family:monospace;font-size:11px;color:#006633">✅ ${s.cardUid}</span>`:'<span style="color:#ccc">—</span>'}</td>
+    <td><button class="btn-icon" onclick='editStudent(${JSON.stringify(s)})'>✏️</button>
+        <button class="btn-icon" onclick="confirmDelete('student','${s.id}','${s.name}')">🗑</button></td>
+  </tr>`).join('');
+}
+function editStudent(s){
+  document.getElementById('editStudentId').value=s.id;
+  document.getElementById('fRegNo').value=s.regNo;
+  document.getElementById('fSName').value=s.name;
+  document.getElementById('fSDept').value=s.department;
+  document.getElementById('fSYear').value=s.year;
+  document.getElementById('fIntake').value=s.intake||'';
+  document.getElementById('fGender').value=s.gender||'Male';
+  showToast('Editing: '+s.name,'info');
+}
+async function saveStudent(){
+  const id=document.getElementById('editStudentId').value;
+  const body={regNo:document.getElementById('fRegNo').value.trim(),name:document.getElementById('fSName').value.trim(),
+    department:document.getElementById('fSDept').value,year:document.getElementById('fSYear').value,
+    intake:document.getElementById('fIntake').value.trim(),gender:document.getElementById('fGender').value};
+  if(!body.regNo||!body.name){showToast('Reg. No. and Name required','err');return;}
+  try{
+    if(id) await api(`/students/${id}`,'PUT',body);
+    else   await api('/students','POST',body);
+    showToast(id?'Student updated':'Student added','ok');
+    clearStudentForm(); await loadStudents();
+  }catch(e){showToast(e.message,'err');}
+}
+function clearStudentForm(){['editStudentId','fRegNo','fSName','fIntake'].forEach(i=>document.getElementById(i).value='');}
+
+// ═══════════ ADMIN: LECTURERS ═══════════
+async function loadLecturers(){
+  try{
+    const lecs=await api('/lecturers');
+    document.getElementById('lecTableBody').innerHTML=lecs.map(l=>`<tr>
+      <td><b>${l.username}</b></td><td>${l.title||''} ${l.name}</td><td>${l.department}</td>
+      <td><span class="badge ${l.role==='admin'?'present':'pending'}">${l.role}</span></td>
+      <td><button class="btn-icon" onclick='editLec(${JSON.stringify(l)})'>✏️</button>
+          <button class="btn-icon" onclick="confirmDelete('lecturer','${l.id}','${l.name}')">🗑</button></td>
+    </tr>`).join('');
+  }catch(e){showToast('Failed to load lecturers','err');}
+}
+function editLec(l){
+  document.getElementById('editLecId').value=l.id;
+  document.getElementById('fLUser').value=l.username;
+  document.getElementById('fLName').value=l.name;
+  document.getElementById('fLTitle').value=l.title||'Dr.';
+  document.getElementById('fLRole').value=l.role;
+  document.getElementById('fLDept').value=l.department;
+  document.getElementById('fLPass').value='';
+  showToast('Editing: '+l.name,'info');
+}
+async function saveLecturer(){
+  const id=document.getElementById('editLecId').value;
+  const body={username:document.getElementById('fLUser').value.trim(),name:document.getElementById('fLName').value.trim(),
+    title:document.getElementById('fLTitle').value,role:document.getElementById('fLRole').value,
+    department:document.getElementById('fLDept').value,passwordHash:document.getElementById('fLPass').value};
+  if(!body.username||!body.name){showToast('Username and Name required','err');return;}
+  if(!id&&!body.passwordHash){showToast('Password required for new lecturer','err');return;}
+  try{
+    if(id) await api(`/lecturers/${id}`,'PUT',body);
+    else   await api('/lecturers','POST',body);
+    showToast(id?'Lecturer updated':'Lecturer added','ok');
+    clearLecForm(); loadLecturers();
+  }catch(e){showToast(e.message,'err');}
+}
+function clearLecForm(){['editLecId','fLUser','fLName','fLPass'].forEach(i=>document.getElementById(i).value='');}
+
+// ═══════════ ADMIN: COURSES ═══════════
+async function loadCoursesTable(){
+  try{
+    const courses=await api('/courses');
+    document.getElementById('courseTableBody').innerHTML=courses.map(c=>`<tr>
+      <td><b>${c.code}</b></td><td>${c.name}</td><td>${c.department}</td><td>${c.year}</td>
+      <td><button class="btn-icon" onclick='editCourse(${JSON.stringify(c)})'>✏️</button>
+          <button class="btn-icon" onclick="confirmDelete('course','${c.id}','${c.name}')">🗑</button></td>
+    </tr>`).join('');
+  }catch(e){showToast('Failed to load courses','err');}
+}
+function editCourse(c){
+  document.getElementById('editCourseId').value=c.id;
+  document.getElementById('fCCode').value=c.code;
+  document.getElementById('fCName').value=c.name;
+  document.getElementById('fCDept').value=c.department;
+  document.getElementById('fCYear').value=c.year;
+  showToast('Editing: '+c.name,'info');
+}
+async function saveCourse(){
+  const id=document.getElementById('editCourseId').value;
+  const body={code:document.getElementById('fCCode').value.trim(),name:document.getElementById('fCName').value.trim(),
+    department:document.getElementById('fCDept').value,year:document.getElementById('fCYear').value};
+  if(!body.code||!body.name){showToast('Code and Name required','err');return;}
+  try{
+    if(id) await api(`/courses/${id}`,'PUT',body);
+    else   await api('/courses','POST',body);
+    showToast(id?'Course updated':'Course added','ok');
+    clearCourseForm(); loadCourses(); loadCoursesTable();
+  }catch(e){showToast(e.message,'err');}
+}
+function clearCourseForm(){['editCourseId','fCCode','fCName'].forEach(i=>document.getElementById(i).value='');}
+
+// ═══════════ DELETE MODAL ═══════════
+function confirmDelete(type,id,name){
+  document.getElementById('modalTitle').textContent='Delete '+type.charAt(0).toUpperCase()+type.slice(1);
+  document.getElementById('modalBody').innerHTML=`<p>Are you sure you want to delete <strong>${name}</strong>? This cannot be undone.</p>`;
+  document.getElementById('modalConfirmBtn').onclick=async()=>{
+    try{
+      if(type==='student')  {await api(`/students/${id}`,'DELETE'); await loadStudents();}
+      if(type==='lecturer') {await api(`/lecturers/${id}`,'DELETE'); loadLecturers();}
+      if(type==='course')   {await api(`/courses/${id}`,'DELETE'); loadCourses(); loadCoursesTable();}
+      showToast(name+' deleted','warn');
+    }catch(e){showToast(e.message,'err');}
+    closeModal();
+  };
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open');}
+
+// ═══════════ PRINT / EXPORT ═══════════
+function printLog(){
+  const rows=allLog.map((r,i)=>`<tr><td>${i+1}</td><td>${r.studentRegNo}</td><td>${r.studentName}</td><td>${r.department}</td><td>${r.year}</td><td>${r.timeIn}</td><td>${r.status}</td></tr>`).join('');
+  const win=window.open('','_blank');
+  win.document.write(`<html><head><title>Attendance Report</title>
+  <style>body{font-family:Arial;padding:28px}h2{color:#003b1f}table{width:100%;border-collapse:collapse;margin-top:12px}
+  th{background:#003b1f;color:white;padding:9px 10px;text-align:left}td{padding:8px 10px;border-bottom:1px solid #e0e0e0}
+  tr:nth-child(even){background:#f9f9f9}.info{font-size:13px;background:#f1f8f4;padding:12px;border-radius:6px;margin:10px 0;display:grid;grid-template-columns:1fr 1fr;gap:6px}.info b{color:#003b1f}</style></head><body>
+  <h2>🎓 UNIVERSITY ATTENDANCE SYSTEM — Report</h2>
+  <div class="info"><div><b>Lecturer:</b> ${currentUser?.name}</div><div><b>Date:</b> ${new Date().toDateString()}</div>
+  <div><b>Total Present:</b> ${allLog.filter(r=>r.status==='Present').length} / ${allStudents.length}</div></div>
+  <table><thead><tr><th>#</th><th>Reg. No.</th><th>Name</th><th>Dept</th><th>Year</th><th>Time In</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>
+  <p style="margin-top:16px;font-size:11px;color:#aaa">Generated by ${currentUser?.name} on ${new Date().toLocaleString()}</p></body></html>`);
+  win.print();
+}
+function exportCSV(){
+  const rows=[['#','Reg No','Name','Department','Year','Course','Time','Status'],
+    ...allLog.map((r,i)=>[i+1,r.studentRegNo,r.studentName,r.department,r.year,r.courseName||'',r.timeIn,r.status])];
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(rows.map(r=>r.join(',')).join('\n'));
+  a.download='attendance_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click(); showToast('CSV exported','ok');
+}
+
+// ═══════════ UTILS ═══════════
+function formatSecs(s){
+  if(s<=0) return 'Expired';
+  const m=Math.floor(s/60), sec=s%60;
+  return m>0?`${m}m ${sec}s`:`${sec}s`;
+}
+function showToast(msg,type){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='show '+type;
+  setTimeout(()=>t.className='',3200);
+}
+</script>
+</body>
+</html>

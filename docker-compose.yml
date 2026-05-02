@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  attendance-api:
+    build: .
+    ports:
+      - "5069:5069"
+      - "3000:3000"
+    environment:
+      - MongoDb__ConnectionString=mongodb://mongo:27017
+      - MongoDb__DatabaseName=attendance_db
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Jwt__Key=your-secret-key-change-in-production
+      - Jwt__Issuer=AttendanceAPI
+      - Jwt__Audience=AttendanceApp
+      - Jwt__ExpiresInHours=24
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=attendance_db
+
+volumes:
+  mongo_data:

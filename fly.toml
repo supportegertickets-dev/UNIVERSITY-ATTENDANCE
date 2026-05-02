@@ -1,0 +1,39 @@
+app = "university-attendance"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[[services]]
+  protocol = "tcp"
+  internal_port = 5069
+  processes = ["app"]
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+    force_https = true
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+
+[[services]]
+  protocol = "tcp"
+  internal_port = 3000
+  processes = ["frontend"]
+
+  [[services.ports]]
+    port = 3000
+    handlers = ["http"]
+
+[env]
+  ASPNETCORE_ENVIRONMENT = "Production"
+  MongoDb__DatabaseName = "attendance_db"
+  Jwt__Issuer = "AttendanceAPI"
+  Jwt__Audience = "AttendanceApp"
+  Jwt__ExpiresInHours = "24"
+
+[mounts]
+  source = "data"
+  destination = "/data"
