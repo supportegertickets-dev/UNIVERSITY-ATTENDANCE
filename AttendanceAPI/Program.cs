@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.FileProviders;
 using System.Text;
 using AttendanceAPI.Services;
 
@@ -64,18 +65,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 // Fallback to index.html for SPA routing
-app.MapFallback(context =>
-{
-    if (!context.Request.Path.StartsWithSegments("/api") && 
-        !context.Request.Path.StartsWithSegments("/swagger"))
-    {
-        context.Request.Path = "/index.html";
-        return app.Services.GetService<IFileProvider>()?.GetFileInfo("index.html") != null 
-            ? Task.CompletedTask 
-            : Task.CompletedTask;
-    }
-    return Task.CompletedTask;
-});
+app.MapFallback(() => Results.File("wwwroot/index.html", "text/html"));
 
 // Listen on Railway PORT environment variable (default 8080)
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
