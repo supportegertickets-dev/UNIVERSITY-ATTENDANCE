@@ -30,3 +30,4 @@ C:\Users\IsaMoma\UniversityAttendance\FrontendServer\obj\Debug\net9.0\refint\Fro
 C:\Users\IsaMoma\UniversityAttendance\FrontendServer\obj\Debug\net9.0\FrontendServer.pdb
 C:\Users\IsaMoma\UniversityAttendance\FrontendServer\obj\Debug\net9.0\FrontendServer.genruntimeconfig.cache
 C:\Users\IsaMoma\UniversityAttendance\FrontendServer\obj\Debug\net9.0\ref\FrontendServer.dll
+C:\Users\IsaMoma\UniversityAttendance\FrontendServer\obj\Debug\net9.0\FrontendServer.sourcelink.json

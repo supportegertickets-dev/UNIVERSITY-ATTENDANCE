@@ -54,7 +54,30 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseCors("AllowAll");
+
+// Serve static files from wwwroot (frontend)
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+// Fallback to index.html for SPA routing
+app.MapFallback(context =>
+{
+    if (!context.Request.Path.StartsWithSegments("/api") && 
+        !context.Request.Path.StartsWithSegments("/swagger"))
+    {
+        context.Request.Path = "/index.html";
+        return app.Services.GetService<IFileProvider>()?.GetFileInfo("index.html") != null 
+            ? Task.CompletedTask 
+            : Task.CompletedTask;
+    }
+    return Task.CompletedTask;
+});
+
+// Listen on Railway PORT environment variable (default 8080)
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+app.Urls.Add($"http://0.0.0.0:{port}");
 app.Run();

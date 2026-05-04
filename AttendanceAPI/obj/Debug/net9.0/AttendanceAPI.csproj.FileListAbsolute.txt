@@ -54,3 +54,4 @@ C:\Users\IsaMoma\UniversityAttendance\AttendanceAPI\obj\Debug\net9.0\refint\Atte
 C:\Users\IsaMoma\UniversityAttendance\AttendanceAPI\obj\Debug\net9.0\AttendanceAPI.pdb
 C:\Users\IsaMoma\UniversityAttendance\AttendanceAPI\obj\Debug\net9.0\AttendanceAPI.genruntimeconfig.cache
 C:\Users\IsaMoma\UniversityAttendance\AttendanceAPI\obj\Debug\net9.0\ref\AttendanceAPI.dll
+C:\Users\IsaMoma\UniversityAttendance\AttendanceAPI\obj\Debug\net9.0\AttendanceAPI.sourcelink.json

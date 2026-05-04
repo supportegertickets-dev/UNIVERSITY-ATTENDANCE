@@ -26,17 +26,17 @@ WORKDIR /app
 # Copy published FrontendServer to /app/frontend-server
 COPY --from=build /app/publish-frontend ./frontend-server
 
-# Copy frontend static files to /app/frontend (accessible from FrontendServer)
-COPY --from=build /src/frontend ./frontend
+# Copy frontend static files to /app/wwwroot (served by AttendanceAPI)
+COPY --from=build /src/frontend ./wwwroot
 
-# Copy published AttendanceAPI to /app/api
-COPY --from=build /app/publish-api ./api
+# Copy published AttendanceAPI to /app
+COPY --from=build /app/publish-api ./
 
-EXPOSE 5069 3000
+EXPOSE 8080
 
 # Set environment variables
 ENV ASPNETCORE_ENVIRONMENT=Production
+ENV PORT=8080
 
-# Use startup script to run both services, or just run FrontendServer
-# For Railway: run FrontendServer which serves static files
-ENTRYPOINT ["dotnet", "frontend-server/FrontendServer.dll"]
+# Run AttendanceAPI (serves both API and static frontend files)
+ENTRYPOINT ["dotnet", "AttendanceAPI.dll"]
