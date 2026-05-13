@@ -2,20 +2,14 @@
 dockerfile = "./Dockerfile"
 
 [deploy]
-startCommand = "dotnet frontend-server/FrontendServer.dll"
+startCommand = "dotnet AttendanceAPI.dll"
 
 [[services]]
 type = "web"
-name = "frontend"
-port = 3000
-
-[[services]]
-type = "web" 
 name = "api"
-port = 5069
-startCommand = "dotnet api/AttendanceAPI.dll"
+port = 8080
 
 [env]
 ASPNETCORE_ENVIRONMENT = "Production"
-PORT = "3000"
-ASPNETCORE_URLS = "http://0.0.0.0:3000"
+PORT = "8080"
+ASPNETCORE_URLS = "http://0.0.0.0:8080"
