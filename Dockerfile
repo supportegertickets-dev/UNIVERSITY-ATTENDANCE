@@ -23,14 +23,17 @@ RUN dotnet publish "FrontendServer/FrontendServer.csproj" -c Release -o /app/pub
 FROM mcr.microsoft.com/dotnet/aspnet:9.0
 WORKDIR /app
 
+# Copy published AttendanceAPI to /app
+COPY --from=build /app/publish-api ./
+
 # Copy published FrontendServer to /app/frontend-server
 COPY --from=build /app/publish-frontend ./frontend-server
 
-# Copy frontend static files to /app/wwwroot (served by AttendanceAPI)
-COPY --from=build /src/frontend ./wwwroot
+# Copy frontend static files to /app/frontend-server/frontend (served by FrontendServer)
+COPY --from=build /src/frontend ./frontend-server/frontend
 
-# Copy published AttendanceAPI to /app
-COPY --from=build /app/publish-api ./
+# Copy frontend static files to /app/wwwroot (fallback)
+COPY --from=build /src/frontend ./wwwroot
 
 EXPOSE 8080
 
