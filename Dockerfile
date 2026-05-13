@@ -29,8 +29,8 @@ COPY --from=build /app/publish-api ./
 # Copy published FrontendServer to /app/frontend-server
 COPY --from=build /app/publish-frontend ./frontend-server
 
-# Copy frontend static files to /app/frontend-server/frontend (served by FrontendServer)
-COPY --from=build /src/frontend ./frontend-server/frontend
+# Copy frontend static files to /app/frontend (searched by FrontendServer)
+COPY --from=build /src/frontend ./frontend
 
 # Copy frontend static files to /app/wwwroot (fallback)
 COPY --from=build /src/frontend ./wwwroot
