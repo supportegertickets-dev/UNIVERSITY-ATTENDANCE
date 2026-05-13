@@ -11,6 +11,9 @@ RUN dotnet restore "FrontendServer/FrontendServer.csproj"
 # Copy source code
 COPY . .
 
+# Copy frontend files to AttendanceAPI wwwroot BEFORE publish
+RUN mkdir -p AttendanceAPI/wwwroot && cp -r frontend/* AttendanceAPI/wwwroot/
+
 # Build
 RUN dotnet build "AttendanceAPI/AttendanceAPI.csproj" -c Release -o /app/build
 RUN dotnet build "FrontendServer/FrontendServer.csproj" -c Release -o /app/build-frontend
@@ -23,17 +26,8 @@ RUN dotnet publish "FrontendServer/FrontendServer.csproj" -c Release -o /app/pub
 FROM mcr.microsoft.com/dotnet/aspnet:9.0
 WORKDIR /app
 
-# Copy published AttendanceAPI to /app
+# Copy published AttendanceAPI (includes wwwroot with frontend files)
 COPY --from=build /app/publish-api ./
-
-# Copy published FrontendServer to /app/frontend-server
-COPY --from=build /app/publish-frontend ./frontend-server
-
-# Copy frontend static files to /app/frontend (searched by FrontendServer)
-COPY --from=build /src/frontend ./frontend
-
-# Copy frontend static files to /app/wwwroot (fallback)
-COPY --from=build /src/frontend ./wwwroot
 
 EXPOSE 8080
 
@@ -41,5 +35,5 @@ EXPOSE 8080
 ENV ASPNETCORE_ENVIRONMENT=Production
 ENV PORT=8080
 
-# Run AttendanceAPI (serves both API and static frontend files)
+# Run AttendanceAPI
 ENTRYPOINT ["dotnet", "AttendanceAPI.dll"]

@@ -75,9 +75,19 @@ app.UseDefaultFiles();
 app.UseStaticFiles();
 
 // Fallback to index.html for SPA routing (catch-all for non-API routes)
-app.MapFallback(() => Results.File("wwwroot/index.html", "text/html"));
+app.MapFallback(() => 
+{
+    var indexPath = Path.Combine(app.Environment.ContentRootPath, "wwwroot", "index.html");
+    if (File.Exists(indexPath))
+    {
+        return Results.File(indexPath, "text/html");
+    }
+    return Results.Text("Frontend not found. Please ensure frontend files are deployed to wwwroot/", statusCode: 404);
+});
 
 // Listen on Railway PORT environment variable (default 8080)
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+app.Urls.Clear();
 app.Urls.Add($"http://0.0.0.0:{port}");
+
 app.Run();
