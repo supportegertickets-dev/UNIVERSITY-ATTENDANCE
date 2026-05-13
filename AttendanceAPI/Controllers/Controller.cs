@@ -15,6 +15,9 @@ namespace AttendanceAPI.Controllers;
 [Route("api/[controller]")]
 public class AuthController(MongoDbService db, IConfiguration config) : ControllerBase
 {
+    [HttpGet("health")]
+    public IActionResult Health() => Ok(new { status = "ok", message = "API is running" });
+
     [HttpPost("login")]
     public IActionResult Login([FromBody] LoginRequest req)
     {
