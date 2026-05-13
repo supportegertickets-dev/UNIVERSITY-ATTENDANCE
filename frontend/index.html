@@ -448,7 +448,11 @@ tbody td{padding:9px 12px;vertical-align:middle}
 <div id="toast"></div>
 
 <script>
-const API = 'http://localhost:5069/api';
+// Dynamic API URL - uses current domain/port for production, localhost for development
+const API = window.location.hostname === 'localhost' 
+  ? 'http://localhost:5069/api'  
+  : `/api`;  // Use same server in production
+
 let token = '', currentUser = null;
 let allStudents = [], allLog = [], activeSessions = [];
 let todayAttendance = {};
