@@ -52,19 +52,29 @@ builder.Services.AddCors(o => o.AddPolicy("AllowAll", p =>
 
 var app = builder.Build();
 
-app.UseSwagger();
-app.UseSwaggerUI();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
 app.UseCors("AllowAll");
 
-// Serve static files from wwwroot (frontend)
+// Auth middleware must come before route handlers
+app.UseAuthentication();
+app.UseAuthorization();
+
+// Health check endpoint (no auth required)
+app.MapGet("/health", () => new { status = "ok", timestamp = DateTime.UtcNow, aspNetCoreEnv = app.Environment.EnvironmentName });
+
+// Map API controllers BEFORE static files
+app.MapControllers();
+
+// Then serve static files from wwwroot (frontend)
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapControllers();
-
-// Fallback to index.html for SPA routing
+// Fallback to index.html for SPA routing (catch-all for non-API routes)
 app.MapFallback(() => Results.File("wwwroot/index.html", "text/html"));
 
 // Listen on Railway PORT environment variable (default 8080)
